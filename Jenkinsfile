@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         RESULTS_DIR = "results"
+        VENV = "/opt/robotenv"
     }
 
     stages {
@@ -14,23 +15,30 @@ pipeline {
             }
         }
 
-        stage('Build Check') {
+        stage('Activate Python Env') {
             steps {
-                echo "Verifying Environment..."
-                sh 'python3 --version'
-                sh 'robot --version'
-                sh 'chromium --version'
+                sh """
+                . ${VENV}/bin/activate
+                python --version
+                robot --version
+                """
+            }
+        }
+
+        stage('Check Browser') {
+            steps {
+                sh """
+                google-chrome --version || chromium --version
+                chromedriver --version
+                """
             }
         }
 
         stage('Run Robot Tests') {
             steps {
                 sh """
-                robot --outputdir ${RESULTS_DIR} \
-                      --variable BROWSER:headlesschrome \
-                      --variable REMOTE_URL:http://localhost:4444/wd/hub \
-                      --settag docker_run \
-                      tests/
+                . ${VENV}/bin/activate
+                robot --outputdir ${RESULTS_DIR} tests/
                 """
             }
         }
@@ -38,7 +46,6 @@ pipeline {
 
     post {
         always {
-            // Requires "Robot Framework Plugin" installed in Jenkins
             step([$class: 'RobotPublisher',
                 outputPath: "${RESULTS_DIR}",
                 outputFileName: 'output.xml',
@@ -48,7 +55,7 @@ pipeline {
                 passThreshold: 100.0,
                 unstableThreshold: 80.0
             ])
-            
+
             archiveArtifacts artifacts: "${RESULTS_DIR}/*.*", allowEmptyArchive: true
         }
     }
