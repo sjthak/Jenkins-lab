@@ -6,6 +6,7 @@ ${URL}    https://computing.kku.ac.th
 
 *** Test Cases ***
 Open KKU Computing Website
-    Open Browser    ${URL}    chrome    options=add_argument(--headless);add_argument(--no-sandbox);add_argument(--disable-dev-shm-usage)
+    Set Environment Variable    DISPLAY    :99
+    Open Browser    ${URL}    chrome
     Title Should Contain    KKU
     Close Browser
