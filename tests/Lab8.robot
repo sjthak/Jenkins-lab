@@ -1,13 +1,8 @@
 *** Settings ***
 Library    SeleniumLibrary
-Library    Collections
 
 *** Test Cases ***
 Open KKU Computing Website
-    ${args}=    Create List    --headless    --no-sandbox    --disable-dev-shm-usage    --disable-gpu    --window-size=1920,1080
-    ${chrome_options}=    Create Dictionary    args=${args}
-    ${caps}=    Create Dictionary    goog:chromeOptions=${chrome_options}
-
-    Open Browser    https://computing.kku.ac.th    chrome    desired_capabilities=${caps}
+    Open Browser    https://computing.kku.ac.th    chrome    options=add_argument(--headless);add_argument(--no-sandbox);add_argument(--disable-dev-shm-usage);add_argument(--disable-gpu);add_argument(--remote-debugging-port=9222);add_argument(--window-size=1920,1080)
     Title Should Contain    KKU
     Close Browser
